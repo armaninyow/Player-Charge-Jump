@@ -1,0 +1,40 @@
+{
+	"schemaVersion": 1,
+	"id": "playerchargejump",
+	"version": "${version}",
+	"name": "Player Charge Jump",
+	"description": "Ports the horse charge jump mechanic directly to the player character.",
+	"authors": [
+		"Armaninyow"
+	],
+	"contact": {
+		"homepage": "https://modrinth.com/mod/no-item-bounce",
+		"sources": "https://github.com/armaninyow/Player-Charge-Jump",
+		"issues": "https://github.com/armaninyow/Player-Charge-Jump/discussions/categories/issues"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/playerchargejump/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"main": [
+			"com.armaninyow.playerchargejump.PlayerChargeJump"
+		],
+		"client": [
+			"com.armaninyow.playerchargejump.PlayerChargeJumpClient"
+		],
+		"modmenu": [
+			"com.armaninyow.playerchargejump.ModMenuIntegration"
+		]
+	},
+	"mixins": [
+		"playerchargejump.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.18.4",
+		"minecraft": "~1.21.10",
+		"java": ">=21",
+		"fabric-api": "*",
+		"cloth-config": "*",
+		"modmenu": "*"
+	}
+}
