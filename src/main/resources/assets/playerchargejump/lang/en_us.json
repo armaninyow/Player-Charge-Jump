@@ -5,5 +5,6 @@
 	"text.autoconfig.playerchargejump.option.chargeDelay.@Tooltip": "Ticks Shift+Space must be held before charging begins.\nReleasing before this fires a normal jump.\nRange: 5–20 ticks. Default: 5",
 
 	"text.autoconfig.playerchargejump.option.chargeSpeed": "Charge Speed",
-	"text.autoconfig.playerchargejump.option.chargeSpeed.@Tooltip": "Ticks it takes to fully fill the charge bar.\nRange: 10–40 ticks. Default: 15"
+	"text.autoconfig.playerchargejump.option.chargeSpeed.@Tooltip": "Ticks it takes to fully fill the charge bar.\nRange: 10–40 ticks. Default: 10"
+
 }
