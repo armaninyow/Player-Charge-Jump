@@ -15,7 +15,7 @@ public class ModConfig implements ConfigData {
 
 	@ConfigEntry.Gui.Tooltip
 	@ConfigEntry.BoundedDiscrete(min = 10, max = 40)
-	public int chargeSpeed = 15;
+	public int chargeSpeed = 10;
 
 	public static ModConfig get() {
 		return AutoConfig.getConfigHolder(ModConfig.class).getConfig();
