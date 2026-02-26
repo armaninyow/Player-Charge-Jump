@@ -2,6 +2,10 @@ package com.armaninyow.playerchargejump;
 
 public class ChargeJumpState {
 
+	// Set to true when the server sends the opt-in packet on join.
+	// The charge jump is disabled entirely on vanilla servers.
+	public static boolean serverAllowed = false;
+
 	// How many ticks the jump key has been held
 	public static int jumpHeldTicks = 0;
 

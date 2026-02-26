@@ -20,8 +20,8 @@ public class ClientPlayerEntityMixin {
 
 	/**
 	 * Tick the charge-jump state machine.
-	 * Triggered by Shift+Space. Vanilla Space alone is left untouched,
-	 * so repeated jumping still works normally when Shift is not held.
+	 * Triggered by Shift+Space. Only active when the server has the mod installed
+	 * and has sent the opt-in packet. On vanilla servers this method does nothing.
 	 */
 	@Inject(at = @At("HEAD"), method = "tickMovement")
 	private void pcj_tickMovement(CallbackInfo ci) {
@@ -30,6 +30,12 @@ public class ClientPlayerEntityMixin {
 
 		if (!(self instanceof ClientPlayerEntity player)) return;
 		if (client.player != player) return;
+
+		// Do nothing on vanilla servers
+		if (!ChargeJumpState.serverAllowed) {
+			pcj_wasJumpPressed = false;
+			return;
+		}
 
 		PlayerAbilities abilities = player.getAbilities();
 		if (abilities.flying || player.hasVehicle()) {
@@ -113,7 +119,7 @@ public class ClientPlayerEntityMixin {
 	/**
 	 * Suppress vanilla jump while Shift+Space is held so we control
 	 * the exact moment the player leaves the ground.
-	 * Vanilla Space alone (without Shift) is never cancelled here.
+	 * Only active when the server has opted in.
 	 */
 	@Inject(at = @At("HEAD"), method = "jump", cancellable = true)
 	private void pcj_jump(CallbackInfo ci) {
@@ -123,7 +129,7 @@ public class ClientPlayerEntityMixin {
 		if (!(self instanceof ClientPlayerEntity player)) return;
 		if (client.player != player) return;
 
-		if (isChargeComboPressed(client)) {
+		if (ChargeJumpState.serverAllowed && isChargeComboPressed(client)) {
 			ci.cancel();
 		}
 	}
