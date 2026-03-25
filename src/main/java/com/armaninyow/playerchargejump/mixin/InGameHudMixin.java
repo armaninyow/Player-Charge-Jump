@@ -27,7 +27,10 @@ public class InGameHudMixin {
 
 	@Inject(at = @At("TAIL"), method = "render")
 	private void pcj_renderChargeBar(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
-		if (!ChargeJumpState.charging) return;
+		boolean charging = ChargeJumpState.charging;
+		boolean lingering = ChargeJumpState.lingerTicks > 0;
+		boolean delaying = ChargeJumpState.delaying;
+		if (!charging && !lingering && !delaying) return;
 		if (client.player == null) return;
 		if (client.player.hasVehicle()) return;
 
@@ -43,12 +46,16 @@ public class InGameHudMixin {
 		// Draw background
 		context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, JUMP_BAR_BACKGROUND, x, y, barWidth, barHeight);
 
-		// Fill width: grows 0→182 during charge, then shrinks 182→146 during overcharge
+		// Fill width: live during charge (always takes priority), frozen during linger
 		int fillWidth;
-		if (ChargeJumpState.overcharged) {
-			fillWidth = BAR_FULL_PX - (int) (ChargeJumpState.overchargeProgress * (BAR_FULL_PX - OVERCHARGE_MIN_PX));
+		if (charging) {
+			if (ChargeJumpState.overcharged) {
+				fillWidth = BAR_FULL_PX - (int) (ChargeJumpState.overchargeProgress * (BAR_FULL_PX - OVERCHARGE_MIN_PX));
+			} else {
+				fillWidth = (int) (ChargeJumpState.chargeProgress * barWidth);
+			}
 		} else {
-			fillWidth = (int) (ChargeJumpState.chargeProgress * barWidth);
+			fillWidth = ChargeJumpState.lingerFillPx;
 		}
 
 		if (fillWidth > 0) {

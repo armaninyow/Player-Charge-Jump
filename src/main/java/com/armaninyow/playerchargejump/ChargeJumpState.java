@@ -9,6 +9,9 @@ public class ChargeJumpState {
 	// How many ticks the jump key has been held
 	public static int jumpHeldTicks = 0;
 
+	// True from first keypress until charging begins or keys are released
+	public static boolean delaying = false;
+
 	// Whether we are in the charging phase (past delay, bar visible)
 	public static boolean charging = false;
 
@@ -21,11 +24,20 @@ public class ChargeJumpState {
 	// Overcharge shrink progress [0.0, 1.0] — drives bar shrink from 182 down to 146 px
 	public static float overchargeProgress = 0.0f;
 
+	// Ticks remaining to show the bar after keys are released (linger phase)
+	public static int lingerTicks = 0;
+
+	// Fill width frozen at the moment of release, used during the linger phase
+	public static int lingerFillPx = 0;
+
 	public static void reset() {
 		jumpHeldTicks = 0;
+		delaying = false;
 		charging = false;
 		chargeProgress = 0.0f;
 		overcharged = false;
 		overchargeProgress = 0.0f;
+		lingerTicks = 0;
+		lingerFillPx = 0;
 	}
 }

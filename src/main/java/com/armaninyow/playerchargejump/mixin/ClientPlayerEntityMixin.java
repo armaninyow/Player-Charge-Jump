@@ -47,23 +47,34 @@ public class ClientPlayerEntityMixin {
 		// If we left the ground, reset charging state
 		if (!player.isOnGround()) {
 			if (ChargeJumpState.charging) ChargeJumpState.reset();
-			pcj_wasJumpPressed = isChargeComboPressed(client);
+			boolean jumpPressed = isChargeComboPressed(client);
+			if (jumpPressed && ChargeJumpState.lingerTicks > 0) ChargeJumpState.reset();
+			pcj_wasJumpPressed = jumpPressed;
 			return;
 		}
 
 		boolean jumpPressed = isChargeComboPressed(client);
+		boolean anyJumpPressed = client.options.jumpKey.isPressed();
 		ModConfig cfg = ModConfig.get();
+
+		// Any jump input (Space alone or Shift+Space) cancels the linger immediately
+		if (anyJumpPressed && ChargeJumpState.lingerTicks > 0) {
+			ChargeJumpState.reset();
+		}
 
 		if (jumpPressed) {
 			if (!pcj_wasJumpPressed) {
-				// Combo just went down this tick — start counter
+				// Combo just went down this tick — wipe any leftover linger state, start counter
+				ChargeJumpState.reset();
 				ChargeJumpState.jumpHeldTicks = 1;
+				ChargeJumpState.delaying = true;
 			} else {
 				ChargeJumpState.jumpHeldTicks++;
 			}
 
 			int delay = cfg.chargeDelay;
 			if (ChargeJumpState.jumpHeldTicks > delay) {
+				ChargeJumpState.delaying = false;
 				ChargeJumpState.charging = true;
 
 				int ticksCharging = ChargeJumpState.jumpHeldTicks - delay;
@@ -103,13 +114,27 @@ public class ClientPlayerEntityMixin {
 					// Outside sweet spot — standard vanilla jump
 					player.jump();
 				}
-				ChargeJumpState.reset();
+				// Freeze the bar at its current fill and let it linger for 15 ticks
+				ChargeJumpState.lingerFillPx = fillPx;
+				ChargeJumpState.lingerTicks = 15;
+				ChargeJumpState.charging = false;
+				ChargeJumpState.delaying = false;
+				ChargeJumpState.jumpHeldTicks = 0;
 			} else {
 				// Released before delay — standard vanilla jump
 				ChargeJumpState.jumpHeldTicks = 0;
+				ChargeJumpState.delaying = false;
 				if (player.isOnGround()) {
 					player.jump();
 				}
+			}
+		}
+
+		// Tick down the linger timer
+		if (ChargeJumpState.lingerTicks > 0) {
+			ChargeJumpState.lingerTicks--;
+			if (ChargeJumpState.lingerTicks == 0) {
+				ChargeJumpState.lingerFillPx = 0;
 			}
 		}
 
