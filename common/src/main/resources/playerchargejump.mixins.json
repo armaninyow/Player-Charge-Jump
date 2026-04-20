@@ -1,0 +1,15 @@
+{
+	"required": true,
+	"package": "com.armaninyow.playerchargejump.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"client": [
+		"ClientPlayerEntityMixin",
+		"InGameHudMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}
