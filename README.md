@@ -19,6 +19,8 @@ If you encounter bugs or wish to contribute:
 <details>
   <summary></summary>
    
+### 3.1.1—1.21.x
+* Fixed an issue where all versions were incorrectly loading the same mod
 ### 3.1.0—1.21.x
 * Split 1.21.5-1.21.11 into two separate version ranges to account for API differences across minor versions
 * Merged 1.21.2-1.21.5 into a single version range due to shared rendering API compatibility
