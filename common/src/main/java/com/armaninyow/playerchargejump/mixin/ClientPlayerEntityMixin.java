@@ -2,10 +2,10 @@ package com.armaninyow.playerchargejump.mixin;
 
 import com.armaninyow.playerchargejump.ChargeJumpState;
 import com.armaninyow.playerchargejump.config.ModConfig;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerAbilities;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Abilities;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -23,12 +23,12 @@ public class ClientPlayerEntityMixin {
 	 * Triggered by Shift+Space. Only active when the server has the mod installed
 	 * and has sent the opt-in packet. On vanilla servers this method does nothing.
 	 */
-	@Inject(at = @At("HEAD"), method = "tickMovement")
+	@Inject(at = @At("HEAD"), method = "aiStep")
 	private void pcj_tickMovement(CallbackInfo ci) {
 		LivingEntity self = (LivingEntity) (Object) this;
-		MinecraftClient client = MinecraftClient.getInstance();
+		Minecraft client = Minecraft.getInstance();
 
-		if (!(self instanceof ClientPlayerEntity player)) return;
+		if (!(self instanceof LocalPlayer player)) return;
 		if (client.player != player) return;
 
 		// Do nothing on vanilla servers
@@ -37,15 +37,15 @@ public class ClientPlayerEntityMixin {
 			return;
 		}
 
-		PlayerAbilities abilities = player.getAbilities();
-		if (abilities.flying || player.hasVehicle()) {
+		Abilities abilities = player.getAbilities();
+		if (abilities.flying || player.isPassenger()) {
 			if (ChargeJumpState.charging) ChargeJumpState.reset();
 			pcj_wasJumpPressed = false;
 			return;
 		}
 
 		// If we left the ground, reset charging state
-		if (!player.isOnGround()) {
+		if (!player.onGround()) {
 			if (ChargeJumpState.charging) ChargeJumpState.reset();
 			boolean jumpPressed = isChargeComboPressed(client);
 			if (jumpPressed && ChargeJumpState.lingerTicks > 0) ChargeJumpState.reset();
@@ -54,7 +54,7 @@ public class ClientPlayerEntityMixin {
 		}
 
 		boolean jumpPressed = isChargeComboPressed(client);
-		boolean anyJumpPressed = client.options.jumpKey.isPressed();
+		boolean anyJumpPressed = client.options.keyJump.isDown();
 		ModConfig cfg = ModConfig.get();
 
 		// Any jump input (Space alone or Shift+Space) cancels the linger immediately
@@ -83,7 +83,7 @@ public class ClientPlayerEntityMixin {
 				if (progress >= 1.0f) {
 					ChargeJumpState.chargeProgress = 1.0f;
 					ChargeJumpState.overcharged = true;
-					// Tick the shrink animation: takes chargeSpeed ticks to shrink 182→146
+					// Tick the shrink animation: takes chargeSpeed ticks to shrink 182->146
 					int ticksOvercharged = ticksCharging - cfg.chargeSpeed;
 					ChargeJumpState.overchargeProgress = Math.min(1.0f, (float) ticksOvercharged / cfg.chargeSpeed);
 				} else {
@@ -101,7 +101,7 @@ public class ClientPlayerEntityMixin {
 					fillPx = (int) (ChargeJumpState.chargeProgress * 182);
 				}
 
-				// Sweet spot: 161–182 px
+				// Sweet spot: 161-182 px
 				boolean inSweetSpot = fillPx >= 161 && fillPx <= 182;
 
 				if (inSweetSpot) {
@@ -109,10 +109,10 @@ public class ClientPlayerEntityMixin {
 					// Power-law fit to MC physics: v = 0.36853 * h^0.56522, accurate to <0.4%.
 					double blocks = 24 / 16.0;
 					double velocity = 0.36853 * Math.pow(blocks, 0.56522);
-					player.setVelocity(player.getVelocity().x, velocity, player.getVelocity().z);
+					player.setDeltaMovement(player.getDeltaMovement().x, velocity, player.getDeltaMovement().z);
 				} else {
 					// Outside sweet spot — standard vanilla jump
-					player.jump();
+					player.jumpFromGround();
 				}
 				// Freeze the bar at its current fill and let it linger for 15 ticks
 				ChargeJumpState.lingerFillPx = fillPx;
@@ -124,8 +124,8 @@ public class ClientPlayerEntityMixin {
 				// Released before delay — standard vanilla jump
 				ChargeJumpState.jumpHeldTicks = 0;
 				ChargeJumpState.delaying = false;
-				if (player.isOnGround()) {
-					player.jump();
+				if (player.onGround()) {
+					player.jumpFromGround();
 				}
 			}
 		}
@@ -146,12 +146,12 @@ public class ClientPlayerEntityMixin {
 	 * the exact moment the player leaves the ground.
 	 * Only active when the server has opted in.
 	 */
-	@Inject(at = @At("HEAD"), method = "jump", cancellable = true)
+	@Inject(at = @At("HEAD"), method = "jumpFromGround", cancellable = true)
 	private void pcj_jump(CallbackInfo ci) {
 		LivingEntity self = (LivingEntity) (Object) this;
-		MinecraftClient client = MinecraftClient.getInstance();
+		Minecraft client = Minecraft.getInstance();
 
-		if (!(self instanceof ClientPlayerEntity player)) return;
+		if (!(self instanceof LocalPlayer player)) return;
 		if (client.player != player) return;
 
 		if (ChargeJumpState.serverAllowed && isChargeComboPressed(client)) {
@@ -164,7 +164,7 @@ public class ClientPlayerEntityMixin {
 	 * are held simultaneously.
 	 */
 	@Unique
-	private static boolean isChargeComboPressed(MinecraftClient client) {
-		return client.options.jumpKey.isPressed() && client.options.sneakKey.isPressed();
+	private static boolean isChargeComboPressed(Minecraft client) {
+		return client.options.keyJump.isDown() && client.options.keyShift.isDown();
 	}
 }

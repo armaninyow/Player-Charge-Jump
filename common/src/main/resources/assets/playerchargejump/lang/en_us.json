@@ -1,9 +1,8 @@
 {
-	"text.autoconfig.playerchargejump.title": "Player Charge Jump",
-
-	"text.autoconfig.playerchargejump.option.chargeDelay": "Charge Delay",
-	"text.autoconfig.playerchargejump.option.chargeDelay.@Tooltip": "Ticks Shift+Space must be held before charging begins.\nReleasing before this fires a normal jump.\nRange: 5–20 ticks. Default: 5",
-
-	"text.autoconfig.playerchargejump.option.chargeSpeed": "Charge Speed",
-	"text.autoconfig.playerchargejump.option.chargeSpeed.@Tooltip": "Ticks it takes to fully fill the charge bar.\nRange: 10–40 ticks. Default: 10"
+  "config.playerchargejump.title": "Player Charge Jump",
+  "config.playerchargejump.category.general": "General",
+  "config.playerchargejump.option.chargeDelay": "Charge Delay",
+  "config.playerchargejump.option.chargeDelay.desc": "How many ticks you must hold Shift+Space before charging begins (5–20).",
+  "config.playerchargejump.option.chargeSpeed": "Charge Speed",
+  "config.playerchargejump.option.chargeSpeed.desc": "How many ticks it takes to fill the charge bar fully (10–40)."
 }

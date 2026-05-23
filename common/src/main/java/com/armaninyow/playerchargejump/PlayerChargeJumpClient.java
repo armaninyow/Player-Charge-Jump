@@ -9,7 +9,7 @@ public class PlayerChargeJumpClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
-		ModConfig.register();
+		ModConfig.load();
 
 		// Receive the opt-in packet from the server — enable the charge jump
 		ClientPlayNetworking.registerGlobalReceiver(PlayerChargeJump.OPT_IN_PACKET_ID, (payload, context) -> {
